@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>STAR Water Gun Catalogue 2027 | STARTOYS (India)</title>
+<meta name="description" content="Browse the STAR Water Gun Catalogue 2027 by STARTOYS (India). View online or download the full PDF.">
+<link rel="icon" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--red:#E10600;--dark:#B30500;--yellow:#FFD500;--ink:#16110F;--paper:#FFF8E7}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font:500 1rem/1.5 'Nunito',system-ui,sans-serif;color:var(--ink);background:var(--red);min-height:100svh}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+.page{min-height:100svh;padding:clamp(20px,4vw,48px) clamp(14px,4vw,40px) 40px;background:
+ radial-gradient(circle at 12% 8%,rgba(255,213,0,.28),transparent 38%),
+ repeating-conic-gradient(from 0deg at 50% -20%,var(--red) 0 7deg,var(--dark) 7deg 14deg)}
+.wrap{width:min(1100px,100%);margin-inline:auto}
+header{display:flex;align-items:center;gap:clamp(14px,3vw,28px);flex-wrap:wrap;color:#fff}
+.logo{width:clamp(84px,14vw,132px);aspect-ratio:1;border-radius:22px;border:4px solid var(--yellow);box-shadow:0 8px 0 rgba(0,0,0,.25);flex-shrink:0}
+.eyebrow{font:800 .85rem 'Baloo 2';letter-spacing:.18em;text-transform:uppercase;color:var(--yellow)}
+h1{font:800 clamp(2rem,6vw,4rem)/1 'Baloo 2',sans-serif;text-shadow:0 4px 0 rgba(0,0,0,.25)}
+.sub{opacity:.95;margin-top:6px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:800 1rem 'Baloo 2';padding:12px 24px;border-radius:999px;border:3px solid var(--ink);background:var(--yellow);color:var(--ink);text-decoration:none;cursor:pointer;box-shadow:0 4px 0 var(--ink);transition:transform .12s,box-shadow .12s}
+.btn:hover{transform:translateY(2px);box-shadow:0 2px 0 var(--ink)}
+.btn.alt{background:#fff}
+.viewer{background:var(--paper);border:4px solid var(--ink);border-radius:24px;box-shadow:0 10px 0 rgba(0,0,0,.28);overflow:hidden}
+.bar{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;background:#fff;border-bottom:3px solid var(--ink);flex-wrap:wrap}
+.bar button{font:800 1rem 'Baloo 2';min-width:44px;height:44px;padding:0 16px;border-radius:12px;border:3px solid var(--ink);background:var(--yellow);cursor:pointer}
+.bar button:disabled{opacity:.4;cursor:default}
+.pg{display:flex;align-items:center;gap:8px;font-weight:700}
+.pg input{width:64px;height:44px;text-align:center;font:700 1rem 'Nunito';border:3px solid var(--ink);border-radius:12px}
+.stage{position:relative;display:grid;place-items:center;padding:clamp(10px,2vw,24px);min-height:60svh;touch-action:pan-y}
+canvas{display:block;max-width:100%;height:auto;background:#fff;border-radius:6px;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.msg{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;font-weight:700;background:var(--paper)}
+.msg[hidden]{display:none}
+.spin{width:44px;height:44px;border:5px solid var(--yellow);border-top-color:var(--red);border-radius:50%;animation:s .8s linear infinite;margin:0 auto 12px}
+@keyframes s{to{transform:rotate(360deg)}}
+.hint{text-align:center;color:#fff;font-size:.9rem;margin-top:16px;opacity:.9}
+.viewer:fullscreen{border-radius:0;border:0;display:flex;flex-direction:column}
+.viewer:fullscreen .stage{flex:1;overflow:auto}
+@media(max-width:560px){header{flex-direction:column;align-items:flex-start}.actions .btn{flex:1 1 100%}.bar{gap:8px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="page">
+  <section class="wrap" aria-labelledby="t">
+    <header>
+      <img class="logo" src="star-logo.png" alt="STAR logo" width="132" height="132">
+      <div>
+        <div class="eyebrow">STARTOYS (India)</div>
+        <h1 id="t">Water Gun Catalogue 2027</h1>
+        <p class="sub">Flip through the full catalogue online, or download it as a PDF.</p>
+      </div>
+    </header>
+
+    <div class="actions">
+      <a class="btn" href="HOLI-2027.pdf" download>Download PDF</a>
+      <a class="btn alt" href="HOLI-2027.pdf" target="_blank" rel="noopener">Open in new tab</a>
+      <button class="btn alt" id="fs" type="button">Full screen</button>
+    </div>
+
+    <div class="viewer" id="viewer">
+      <div class="bar">
+        <button id="prev" type="button" aria-label="Previous page">&larr; Prev</button>
+        <div class="pg"><input id="num" type="number" min="1" value="1" aria-label="Page number"> <span>/ <b id="tot">–</b></span></div>
+        <button id="next" type="button" aria-label="Next page">Next &rarr;</button>
+      </div>
+      <div class="stage" id="stage">
+        <canvas id="cv" aria-label="Catalogue page"></canvas>
+        <div class="msg" id="msg"><div><div class="spin"></div>Loading catalogue…</div></div>
+      </div>
+    </div>
+    <p class="hint">Tip: use the arrow keys or swipe left and right to change pages.</p>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+const URL_PDF="HOLI-2027.pdf";
+const $=id=>document.getElementById(id);
+const cv=$("cv"),ctx=cv.getContext("2d"),stage=$("stage"),msg=$("msg");
+let pdf=null,cur=1,task=null,tm=null;
+
+function fail(){
+  msg.hidden=false;
+  msg.innerHTML='<div>The preview could not load here.<br><br><a class="btn" href="'+URL_PDF+'" target="_blank" rel="noopener">Open the PDF</a></div>';
+}
+async function render(n){
+  if(!pdf)return;
+  n=Math.min(Math.max(1,n),pdf.numPages);cur=n;
+  $("num").value=n;$("prev").disabled=n<=1;$("next").disabled=n>=pdf.numPages;
+  if(task){try{task.cancel()}catch(e){}}
+  try{
+    const page=await pdf.getPage(n);
+    const base=page.getViewport({scale:1});
+    const avail=Math.min(stage.clientWidth-(innerWidth<600?20:48),900);
+    const css=avail/base.width, dpr=Math.min(devicePixelRatio||1,2);
+    const vp=page.getViewport({scale:css*dpr});
+    cv.width=vp.width;cv.height=vp.height;
+    cv.style.width=vp.width/dpr+"px";cv.style.height=vp.height/dpr+"px";
+    task=page.render({canvasContext:ctx,viewport:vp});
+    await task.promise;
+    msg.hidden=true;
+    if(n<pdf.numPages)pdf.getPage(n+1);
+  }catch(e){if(e&&e.name!=="RenderingCancelledException")console.error(e)}
+}
+pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+pdfjsLib.getDocument({url:URL_PDF,disableAutoFetch:true,disableStream:false}).promise
+  .then(d=>{pdf=d;$("tot").textContent=d.numPages;$("num").max=d.numPages;render(1)})
+  .catch(fail);
+
+$("prev").onclick=()=>render(cur-1);
+$("next").onclick=()=>render(cur+1);
+$("num").onchange=e=>render(parseInt(e.target.value)||1);
+addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT")return;
+  if(e.key==="ArrowRight")render(cur+1);
+  if(e.key==="ArrowLeft")render(cur-1);
+});
+let sx=null;
+stage.addEventListener("touchstart",e=>{sx=e.touches[0].clientX},{passive:true});
+stage.addEventListener("touchend",e=>{
+  if(sx===null)return;const dx=e.changedTouches[0].clientX-sx;sx=null;
+  if(Math.abs(dx)>60)render(cur+(dx<0?1:-1));
+});
+addEventListener("resize",()=>{clearTimeout(tm);tm=setTimeout(()=>render(cur),200)});
+$("fs").onclick=()=>{
+  const v=$("viewer");
+  if(document.fullscreenElement)document.exitFullscreen();
+  else if(v.requestFullscreen)v.requestFullscreen();
+  else window.open(URL_PDF,"_blank");
+};
+document.addEventListener("fullscreenchange",()=>setTimeout(()=>render(cur),150));
+</script>
+</body>
+</html>
