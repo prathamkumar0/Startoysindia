@@ -13,45 +13,62 @@
 :root{--red:#E10600;--dark:#B30500;--yellow:#FFD500;--ink:#16110F;--paper:#FFF8E7}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
-body{font:500 1rem/1.5 'Nunito',system-ui,sans-serif;color:var(--ink);background:var(--red);min-height:100svh}
+body{font:500 1rem/1.5 'Nunito',system-ui,sans-serif;color:var(--ink);background:var(--red);min-height:100svh;overflow-x:hidden}
 :focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
-.page{min-height:100svh;padding:clamp(20px,4vw,48px) clamp(14px,4vw,40px) 40px;background:
- radial-gradient(circle at 12% 8%,rgba(255,213,0,.28),transparent 38%),
- repeating-conic-gradient(from 0deg at 50% -20%,var(--red) 0 7deg,var(--dark) 7deg 14deg)}
+
+.page{min-height:100svh;
+  padding:max(clamp(16px,3vw,40px),env(safe-area-inset-top)) clamp(12px,3vw,40px) max(32px,env(safe-area-inset-bottom));
+  background:radial-gradient(circle at 12% 8%,rgba(255,213,0,.28),transparent 38%),
+  repeating-conic-gradient(from 0deg at 50% -20%,var(--red) 0 7deg,var(--dark) 7deg 14deg)}
 .wrap{width:min(1100px,100%);margin-inline:auto}
-header{display:flex;align-items:center;gap:clamp(14px,3vw,28px);flex-wrap:wrap;color:#fff}
-.logo{width:clamp(84px,14vw,132px);aspect-ratio:1;border-radius:22px;border:4px solid var(--yellow);box-shadow:0 8px 0 rgba(0,0,0,.25);flex-shrink:0}
-.eyebrow{font:800 .85rem 'Baloo 2';letter-spacing:.18em;text-transform:uppercase;color:var(--yellow)}
-h1{font:800 clamp(2rem,6vw,4rem)/1 'Baloo 2',sans-serif;text-shadow:0 4px 0 rgba(0,0,0,.25)}
-.sub{opacity:.95;margin-top:6px}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:800 1rem 'Baloo 2';padding:12px 24px;border-radius:999px;border:3px solid var(--ink);background:var(--yellow);color:var(--ink);text-decoration:none;cursor:pointer;box-shadow:0 4px 0 var(--ink);transition:transform .12s,box-shadow .12s}
+
+header{display:flex;align-items:center;gap:clamp(14px,3vw,28px);color:#fff}
+.logo{width:clamp(72px,12vw,120px);aspect-ratio:1;border-radius:20px;border:4px solid var(--yellow);box-shadow:0 6px 0 rgba(0,0,0,.25);flex-shrink:0}
+.eyebrow{font:800 .8rem 'Baloo 2',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--yellow)}
+h1{font:800 clamp(1.7rem,5.5vw,3.6rem)/1.02 'Baloo 2',sans-serif;text-shadow:0 4px 0 rgba(0,0,0,.25)}
+.sub{opacity:.95;margin-top:6px;font-size:clamp(.92rem,2vw,1.05rem)}
+
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:clamp(14px,2.5vw,22px) 0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:800 1rem 'Baloo 2',sans-serif;min-height:46px;padding:10px 24px;border-radius:999px;border:3px solid var(--ink);background:var(--yellow);color:var(--ink);text-decoration:none;cursor:pointer;box-shadow:0 4px 0 var(--ink);transition:transform .12s,box-shadow .12s}
 .btn:hover{transform:translateY(2px);box-shadow:0 2px 0 var(--ink)}
 .btn.alt{background:#fff}
-.viewer{background:var(--paper);border:4px solid var(--ink);border-radius:24px;box-shadow:0 10px 0 rgba(0,0,0,.28);overflow:hidden}
-.bar{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;background:#fff;border-bottom:3px solid var(--ink);flex-wrap:wrap}
-.bar button{font:800 1rem 'Baloo 2';min-width:44px;height:44px;padding:0 16px;border-radius:12px;border:3px solid var(--ink);background:var(--yellow);cursor:pointer}
+
+.viewer{background:var(--paper);border:4px solid var(--ink);border-radius:22px;box-shadow:0 8px 0 rgba(0,0,0,.28);overflow:hidden}
+.bar{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px;background:#fff;border-bottom:3px solid var(--ink)}
+.bar button{font:800 1rem 'Baloo 2',sans-serif;min-width:44px;height:44px;padding:0 16px;border-radius:12px;border:3px solid var(--ink);background:var(--yellow);cursor:pointer}
 .bar button:disabled{opacity:.4;cursor:default}
-.pg{display:flex;align-items:center;gap:8px;font-weight:700}
-.pg input{width:64px;height:44px;text-align:center;font:700 1rem 'Nunito';border:3px solid var(--ink);border-radius:12px}
-.stage{position:relative;display:grid;place-items:center;padding:clamp(10px,2vw,24px);min-height:60svh;touch-action:pan-y}
-canvas{display:block;max-width:100%;height:auto;background:#fff;border-radius:6px;box-shadow:0 6px 24px rgba(0,0,0,.25)}
-.msg{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;font-weight:700;background:var(--paper)}
-.msg[hidden]{display:none}
-.spin{width:44px;height:44px;border:5px solid var(--yellow);border-top-color:var(--red);border-radius:50%;animation:s .8s linear infinite;margin:0 auto 12px}
-@keyframes s{to{transform:rotate(360deg)}}
-.hint{text-align:center;color:#fff;font-size:.9rem;margin-top:16px;opacity:.9}
+.pg{display:flex;align-items:center;gap:8px;font-weight:700;white-space:nowrap}
+.pg input{width:60px;height:44px;text-align:center;font:700 1rem 'Nunito',sans-serif;border:3px solid var(--ink);border-radius:12px}
+
+.stage{display:grid;place-items:center;padding:clamp(10px,2vw,22px);touch-action:pan-y}
+.cover,canvas{display:block;width:auto;height:auto;max-width:100%;border-radius:6px;background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.cover{max-height:calc(100svh - 250px);min-height:200px}
+canvas[hidden],.cover[hidden]{display:none}
+.fb{text-align:center;color:#fff;margin-top:14px;font-weight:700}
+.fb a{color:var(--yellow)}
+.fb[hidden]{display:none}
+.hint{text-align:center;color:#fff;font-size:.9rem;margin-top:14px;opacity:.9}
+
 .viewer:fullscreen{border-radius:0;border:0;display:flex;flex-direction:column}
 .viewer:fullscreen .stage{flex:1;overflow:auto}
-@media(max-width:560px){header{flex-direction:column;align-items:flex-start}.actions .btn{flex:1 1 100%}.bar{gap:8px}}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.viewer:fullscreen .cover{max-height:none}
+
+@media(max-width:640px){
+  header{flex-direction:column;align-items:flex-start;gap:12px}
+  .actions .btn{flex:1 1 100%}
+  .cover{width:100%;max-height:none}
+  .bar{gap:8px;padding:8px}
+  .bar button{padding:0 12px}
+  .hint{display:none}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 <main class="page">
   <section class="wrap" aria-labelledby="t">
     <header>
-      <img class="logo" src="star-logo.png" alt="STAR logo" width="132" height="132">
+      <img class="logo" src="star-logo.png" alt="STAR logo" width="120" height="120">
       <div>
         <div class="eyebrow">STARTOYS (India)</div>
         <h1 id="t">Water Gun Catalogue 2027</h1>
@@ -60,40 +77,34 @@ canvas{display:block;max-width:100%;height:auto;background:#fff;border-radius:6p
     </header>
 
     <div class="actions">
-      <a class="btn" href="
-HOLI-2027 (1).pdf" download>Download PDF</a>
-      <a class="btn alt" href="
-HOLI-2027 (1).pdf" target="_blank" rel="noopener">Open in new tab</a>
+      <a class="btn" href="HOLI-2027%20(1).pdf" download="HOLI-2027.pdf">Download PDF</a>
+      <a class="btn alt" href="HOLI-2027%20(1).pdf" target="_blank" rel="noopener">Open in new tab</a>
       <button class="btn alt" id="fs" type="button">Full screen</button>
     </div>
 
     <div class="viewer" id="viewer">
       <div class="bar">
-        <button id="prev" type="button" aria-label="Previous page">&larr; Prev</button>
+        <button id="prev" type="button" disabled aria-label="Previous page">&larr; Prev</button>
         <div class="pg"><input id="num" type="number" min="1" value="1" aria-label="Page number"> <span>/ <b id="tot">–</b></span></div>
-        <button id="next" type="button" aria-label="Next page">Next &rarr;</button>
+        <button id="next" type="button" disabled aria-label="Next page">Next &rarr;</button>
       </div>
       <div class="stage" id="stage">
-        <canvas id="cv" aria-label="Catalogue page"></canvas>
-        <div class="msg" id="msg"><div><div class="spin"></div>Loading catalogue…</div></div>
+        <img id="cover" class="cover" src="cover.jpg" alt="STAR Water Gun Catalogue 2027 cover" width="613" height="860">
+        <canvas id="cv" aria-label="Catalogue page" hidden></canvas>
       </div>
     </div>
+    <p class="fb" id="fb" hidden>Pages not showing? <a href="HOLI-2027%20(1).pdf" target="_blank" rel="noopener">Open the PDF</a></p>
     <p class="hint">Tip: use the arrow keys or swipe left and right to change pages.</p>
   </section>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-const URL_PDF="
-HOLI-2027 (1).pdf";
+const URL_PDF=encodeURI("HOLI-2027 (1).pdf");
 const $=id=>document.getElementById(id);
-const cv=$("cv"),ctx=cv.getContext("2d"),stage=$("stage"),msg=$("msg");
+const cv=$("cv"),ctx=cv.getContext("2d"),stage=$("stage");
 let pdf=null,cur=1,task=null,tm=null;
 
-function fail(){
-  msg.hidden=false;
-  msg.innerHTML='<div>The preview could not load here.<br><br><a class="btn" href="'+URL_PDF+'" target="_blank" rel="noopener">Open the PDF</a></div>';
-}
 async function render(n){
   if(!pdf)return;
   n=Math.min(Math.max(1,n),pdf.numPages);cur=n;
@@ -102,21 +113,27 @@ async function render(n){
   try{
     const page=await pdf.getPage(n);
     const base=page.getViewport({scale:1});
-    const avail=Math.min(stage.clientWidth-(innerWidth<600?20:48),900);
-    const css=avail/base.width, dpr=Math.min(devicePixelRatio||1,2);
-    const vp=page.getViewport({scale:css*dpr});
+    const pad=innerWidth<640?20:44;
+    let w=Math.min(stage.clientWidth-pad,900);
+    if(!document.fullscreenElement&&innerWidth>640){
+      const maxH=innerHeight-250;
+      w=Math.min(w,Math.max(280,maxH)*base.width/base.height);
+    }
+    const dpr=Math.min(devicePixelRatio||1,2);
+    const vp=page.getViewport({scale:(w/base.width)*dpr});
     cv.width=vp.width;cv.height=vp.height;
     cv.style.width=vp.width/dpr+"px";cv.style.height=vp.height/dpr+"px";
     task=page.render({canvasContext:ctx,viewport:vp});
     await task.promise;
-    msg.hidden=true;
+    cv.hidden=false;$("cover").hidden=true;
     if(n<pdf.numPages)pdf.getPage(n+1);
   }catch(e){if(e&&e.name!=="RenderingCancelledException")console.error(e)}
 }
 pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-pdfjsLib.getDocument({url:URL_PDF,disableAutoFetch:true,disableStream:false}).promise
+pdfjsLib.getDocument({url:URL_PDF,disableAutoFetch:true}).promise
   .then(d=>{pdf=d;$("tot").textContent=d.numPages;$("num").max=d.numPages;render(1)})
-  .catch(fail);
+  .catch(()=>{$("fb").hidden=false});
+setTimeout(()=>{if(!pdf)$("fb").hidden=false},30000);
 
 $("prev").onclick=()=>render(cur-1);
 $("next").onclick=()=>render(cur+1);
@@ -133,11 +150,10 @@ stage.addEventListener("touchend",e=>{
   if(Math.abs(dx)>60)render(cur+(dx<0?1:-1));
 });
 addEventListener("resize",()=>{clearTimeout(tm);tm=setTimeout(()=>render(cur),200)});
+if(!document.fullscreenEnabled)$("fs").hidden=true;
 $("fs").onclick=()=>{
-  const v=$("viewer");
   if(document.fullscreenElement)document.exitFullscreen();
-  else if(v.requestFullscreen)v.requestFullscreen();
-  else window.open(URL_PDF,"_blank");
+  else $("viewer").requestFullscreen();
 };
 document.addEventListener("fullscreenchange",()=>setTimeout(()=>render(cur),150));
 </script>
