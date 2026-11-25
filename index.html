@@ -14,6 +14,7 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
 body{font:500 1rem/1.5 'Nunito',system-ui,sans-serif;color:var(--ink);background:var(--red);min-height:100svh;overflow-x:hidden}
+body.lock{overflow:hidden}
 :focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
 
 .page{min-height:100svh;
@@ -37,6 +38,7 @@ h1{font:800 clamp(1.7rem,5.5vw,3.6rem)/1.02 'Baloo 2',sans-serif;text-shadow:0 4
 .bar{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px;background:#fff;border-bottom:3px solid var(--ink)}
 .bar button{font:800 1rem 'Baloo 2',sans-serif;min-width:44px;height:44px;padding:0 16px;border-radius:12px;border:3px solid var(--ink);background:var(--yellow);cursor:pointer}
 .bar button:disabled{opacity:.4;cursor:default}
+.bar #xit{display:none;background:#fff}
 .pg{display:flex;align-items:center;gap:8px;font-weight:700;white-space:nowrap}
 .pg input{width:60px;height:44px;text-align:center;font:700 1rem 'Nunito',sans-serif;border:3px solid var(--ink);border-radius:12px}
 
@@ -49,18 +51,23 @@ canvas[hidden],.cover[hidden]{display:none}
 .fb[hidden]{display:none}
 .hint{text-align:center;color:#fff;font-size:.9rem;margin-top:14px;opacity:.9}
 
-.viewer:fullscreen{border-radius:0;border:0;display:flex;flex-direction:column}
-.viewer:fullscreen .stage{flex:1;overflow:auto}
-.viewer:fullscreen .cover{max-height:none}
+/* Full screen: works on every device (overlay), plus native fullscreen where supported */
+.viewer.fs{position:fixed;inset:0;z-index:1000;width:100%;height:100vh;height:100dvh;border:0;border-radius:0;box-shadow:none;display:flex;flex-direction:column}
+.viewer.fs .bar{padding-top:max(10px,env(safe-area-inset-top))}
+.viewer.fs #xit{display:inline-flex;align-items:center;justify-content:center}
+.viewer.fs .stage{flex:1;min-height:0;overflow:auto;padding:10px max(10px,env(safe-area-inset-left)) max(10px,env(safe-area-inset-bottom))}
+.viewer.fs .cover{max-height:100%;min-height:0}
 
 @media(max-width:640px){
   header{flex-direction:column;align-items:flex-start;gap:12px}
   .actions .btn{flex:1 1 100%}
   .cover{width:100%;max-height:none}
+  .viewer.fs .cover{width:auto;max-height:100%}
   .bar{gap:8px;padding:8px}
   .bar button{padding:0 12px}
   .hint{display:none}
 }
+@media(max-width:400px){.tx{display:none}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -78,15 +85,15 @@ canvas[hidden],.cover[hidden]{display:none}
 
     <div class="actions">
       <a class="btn" href="HOLI-2027%20(1).pdf" download="HOLI-2027.pdf">Download PDF</a>
-      <a class="btn alt" href="HOLI-2027%20(1).pdf" target="_blank" rel="noopener">Open in new tab</a>
       <button class="btn alt" id="fs" type="button">Full screen</button>
     </div>
 
     <div class="viewer" id="viewer">
       <div class="bar">
-        <button id="prev" type="button" disabled aria-label="Previous page">&larr; Prev</button>
+        <button id="prev" type="button" disabled aria-label="Previous page">&larr;<span class="tx"> Prev</span></button>
         <div class="pg"><input id="num" type="number" min="1" value="1" aria-label="Page number"> <span>/ <b id="tot">–</b></span></div>
-        <button id="next" type="button" disabled aria-label="Next page">Next &rarr;</button>
+        <button id="next" type="button" disabled aria-label="Next page"><span class="tx">Next </span>&rarr;</button>
+        <button id="xit" type="button" aria-label="Exit full screen">&#10005;</button>
       </div>
       <div class="stage" id="stage">
         <img id="cover" class="cover" src="cover.jpg" alt="STAR Water Gun Catalogue 2027 cover" width="613" height="860">
@@ -102,8 +109,9 @@ canvas[hidden],.cover[hidden]{display:none}
 <script>
 const URL_PDF=encodeURI("HOLI-2027 (1).pdf");
 const $=id=>document.getElementById(id);
-const cv=$("cv"),ctx=cv.getContext("2d"),stage=$("stage");
+const cv=$("cv"),ctx=cv.getContext("2d"),stage=$("stage"),viewer=$("viewer");
 let pdf=null,cur=1,task=null,tm=null;
+const isFs=()=>viewer.classList.contains("fs");
 
 async function render(n){
   if(!pdf)return;
@@ -112,13 +120,16 @@ async function render(n){
   if(task){try{task.cancel()}catch(e){}}
   try{
     const page=await pdf.getPage(n);
-    const base=page.getViewport({scale:1});
+    const base=page.getViewport({scale:1}),ratio=base.width/base.height;
     const pad=innerWidth<640?20:44;
-    let w=Math.min(stage.clientWidth-pad,900);
-    if(!document.fullscreenElement&&innerWidth>640){
-      const maxH=innerHeight-250;
-      w=Math.min(w,Math.max(280,maxH)*base.width/base.height);
+    let w;
+    if(isFs()){
+      w=Math.min(stage.clientWidth-20,(stage.clientHeight-20)*ratio,1400);
+    }else{
+      w=Math.min(stage.clientWidth-pad,900);
+      if(innerWidth>640)w=Math.min(w,Math.max(280,innerHeight-250)*ratio);
     }
+    w=Math.max(w,200);
     const dpr=Math.min(devicePixelRatio||1,2);
     const vp=page.getViewport({scale:(w/base.width)*dpr});
     cv.width=vp.width;cv.height=vp.height;
@@ -135,10 +146,27 @@ pdfjsLib.getDocument({url:URL_PDF,disableAutoFetch:true}).promise
   .catch(()=>{$("fb").hidden=false});
 setTimeout(()=>{if(!pdf)$("fb").hidden=false},30000);
 
+function enterFs(){
+  viewer.classList.add("fs");document.body.classList.add("lock");
+  $("fs").textContent="Exit full screen";
+  if(viewer.requestFullscreen){try{viewer.requestFullscreen().catch(()=>{})}catch(e){}}
+  setTimeout(()=>render(cur),120);
+}
+function exitFs(){
+  viewer.classList.remove("fs");document.body.classList.remove("lock");
+  $("fs").textContent="Full screen";
+  if(document.fullscreenElement){try{document.exitFullscreen()}catch(e){}}
+  setTimeout(()=>render(cur),120);
+}
+$("fs").onclick=()=>isFs()?exitFs():enterFs();
+$("xit").onclick=exitFs;
+document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&isFs())exitFs()});
+
 $("prev").onclick=()=>render(cur-1);
 $("next").onclick=()=>render(cur+1);
 $("num").onchange=e=>render(parseInt(e.target.value)||1);
 addEventListener("keydown",e=>{
+  if(e.key==="Escape"&&isFs())return exitFs();
   if(e.target.tagName==="INPUT")return;
   if(e.key==="ArrowRight")render(cur+1);
   if(e.key==="ArrowLeft")render(cur-1);
@@ -150,12 +178,6 @@ stage.addEventListener("touchend",e=>{
   if(Math.abs(dx)>60)render(cur+(dx<0?1:-1));
 });
 addEventListener("resize",()=>{clearTimeout(tm);tm=setTimeout(()=>render(cur),200)});
-if(!document.fullscreenEnabled)$("fs").hidden=true;
-$("fs").onclick=()=>{
-  if(document.fullscreenElement)document.exitFullscreen();
-  else $("viewer").requestFullscreen();
-};
-document.addEventListener("fullscreenchange",()=>setTimeout(()=>render(cur),150));
 </script>
 </body>
 </html>
