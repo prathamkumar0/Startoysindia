@@ -51,18 +51,20 @@ canvas[hidden],.cover[hidden]{display:none}
 .fb[hidden]{display:none}
 .hint{text-align:center;color:#fff;font-size:.9rem;margin-top:14px;opacity:.9}
 
-/* Full screen: works on every device (overlay), plus native fullscreen where supported */
+/* Full screen: continuous scroll like a PDF (works on every device) */
+.scroller{display:none;position:relative;overflow-y:auto;overflow-x:hidden;background:#2b2523;padding:12px 0 max(12px,env(safe-area-inset-bottom));overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y pinch-zoom}
+.pgbox{width:var(--pw,100%);aspect-ratio:var(--ar,613/860);margin:0 auto 12px;background:#fff;box-shadow:0 4px 18px rgba(0,0,0,.45);overflow:hidden}
+.pgbox canvas,.pgbox img{display:block;width:100%;height:100%;max-width:none;border-radius:0;box-shadow:none;object-fit:contain}
 .viewer.fs{position:fixed;inset:0;z-index:1000;width:100%;height:100vh;height:100dvh;border:0;border-radius:0;box-shadow:none;display:flex;flex-direction:column}
 .viewer.fs .bar{padding-top:max(10px,env(safe-area-inset-top))}
 .viewer.fs #xit{display:inline-flex;align-items:center;justify-content:center}
-.viewer.fs .stage{flex:1;min-height:0;overflow:auto;padding:10px max(10px,env(safe-area-inset-left)) max(10px,env(safe-area-inset-bottom))}
-.viewer.fs .cover{max-height:100%;min-height:0}
+.viewer.fs .stage{display:none}
+.viewer.fs .scroller{display:block;flex:1;min-height:0}
 
 @media(max-width:640px){
   header{flex-direction:column;align-items:flex-start;gap:12px}
   .actions .btn{flex:1 1 100%}
   .cover{width:100%;max-height:none}
-  .viewer.fs .cover{width:auto;max-height:100%}
   .bar{gap:8px;padding:8px}
   .bar button{padding:0 12px}
   .hint{display:none}
@@ -99,6 +101,7 @@ canvas[hidden],.cover[hidden]{display:none}
         <img id="cover" class="cover" src="cover.jpg" alt="STAR Water Gun Catalogue 2027 cover" width="613" height="860">
         <canvas id="cv" aria-label="Catalogue page" hidden></canvas>
       </div>
+      <div class="scroller" id="scroller" aria-label="Catalogue pages"></div>
     </div>
     <p class="fb" id="fb" hidden>Pages not showing? <a href="HOLI-2027%20(1).pdf" target="_blank" rel="noopener">Open the PDF</a></p>
     <p class="hint">Tip: use the arrow keys or swipe left and right to change pages.</p>
@@ -109,26 +112,25 @@ canvas[hidden],.cover[hidden]{display:none}
 <script>
 const URL_PDF=encodeURI("HOLI-2027 (1).pdf");
 const $=id=>document.getElementById(id);
-const cv=$("cv"),ctx=cv.getContext("2d"),stage=$("stage"),viewer=$("viewer");
-let pdf=null,cur=1,task=null,tm=null;
+const cv=$("cv"),ctx=cv.getContext("2d"),stage=$("stage"),viewer=$("viewer"),scroller=$("scroller");
+let pdf=null,cur=1,task=null,tm=null,boxes=[],vis=new Set(),built=false,raf=0;
 const isFs=()=>viewer.classList.contains("fs");
 
+function updateBar(n){
+  cur=n;$("num").value=n;
+  $("prev").disabled=!pdf||n<=1;$("next").disabled=!pdf||n>=pdf.numPages;
+}
+
+/* ---- normal (inline) viewer: one page at a time ---- */
 async function render(n){
-  if(!pdf)return;
-  n=Math.min(Math.max(1,n),pdf.numPages);cur=n;
-  $("num").value=n;$("prev").disabled=n<=1;$("next").disabled=n>=pdf.numPages;
+  if(!pdf||isFs())return;
+  n=Math.min(Math.max(1,n),pdf.numPages);updateBar(n);
   if(task){try{task.cancel()}catch(e){}}
   try{
     const page=await pdf.getPage(n);
     const base=page.getViewport({scale:1}),ratio=base.width/base.height;
-    const pad=innerWidth<640?20:44;
-    let w;
-    if(isFs()){
-      w=Math.min(stage.clientWidth-20,(stage.clientHeight-20)*ratio,1400);
-    }else{
-      w=Math.min(stage.clientWidth-pad,900);
-      if(innerWidth>640)w=Math.min(w,Math.max(280,innerHeight-250)*ratio);
-    }
+    let w=Math.min(stage.clientWidth-(innerWidth<640?20:44),900);
+    if(innerWidth>640)w=Math.min(w,Math.max(280,innerHeight-250)*ratio);
     w=Math.max(w,200);
     const dpr=Math.min(devicePixelRatio||1,2);
     const vp=page.getViewport({scale:(w/base.width)*dpr});
@@ -140,9 +142,86 @@ async function render(n){
     if(n<pdf.numPages)pdf.getPage(n+1);
   }catch(e){if(e&&e.name!=="RenderingCancelledException")console.error(e)}
 }
+
+/* ---- full screen: all pages in one scrolling column, like a PDF ---- */
+const io=new IntersectionObserver(es=>es.forEach(e=>{
+  const i=+e.target.dataset.i;
+  if(e.isIntersecting){vis.add(i);renderBox(i)}else{vis.delete(i);releaseBox(i)}
+}),{root:scroller,rootMargin:"1500px 0px"});
+
+async function renderBox(i){
+  const o=boxes[i];if(!o||o.r)return;
+  if(o.b){o.again=true;return}
+  o.b=true;
+  try{
+    const page=await pdf.getPage(i+1);
+    const v0=page.getViewport({scale:1});
+    const css=o.el.clientWidth||1,dpr=Math.min(devicePixelRatio||1,2);
+    const vp=page.getViewport({scale:(css/v0.width)*dpr});
+    o.cv.width=vp.width;o.cv.height=vp.height;
+    await page.render({canvasContext:o.cv.getContext("2d"),viewport:vp}).promise;
+    o.r=true;
+  }catch(e){console.error(e)}
+  o.b=false;
+  if(o.again){o.again=false;o.r=false;if(vis.has(i))renderBox(i)}
+}
+function releaseBox(i){
+  const o=boxes[i];if(!o||o.b||!o.r)return;
+  o.r=false;o.cv.width=o.cv.height=0;
+}
+function layout(){
+  const w=scroller.clientWidth;if(!w)return;
+  scroller.style.setProperty("--pw",Math.min(w-(innerWidth<640?16:32),1000)+"px");
+}
+async function buildScroller(){
+  const b=(await pdf.getPage(1)).getViewport({scale:1});
+  scroller.style.setProperty("--ar",b.width+"/"+b.height);
+  layout();
+  if(!built){
+    scroller.innerHTML="";boxes=[];
+    for(let i=0;i<pdf.numPages;i++){
+      const el=document.createElement("div");el.className="pgbox";el.dataset.i=i;
+      const c=document.createElement("canvas");c.setAttribute("aria-label","Page "+(i+1));
+      el.appendChild(c);scroller.appendChild(el);
+      boxes.push({el,cv:c,r:false,b:false,again:false});io.observe(el);
+    }
+    built=true;
+  }
+  goTo(cur,true);
+}
+function coverBox(){
+  scroller.style.setProperty("--ar","613/860");layout();
+  scroller.innerHTML='<div class="pgbox"><img src="cover.jpg" alt="Catalogue cover"></div>';
+}
+function goTo(n,instant){
+  if(!pdf)return;
+  n=Math.min(Math.max(1,n),pdf.numPages);
+  if(isFs()){
+    if(!built)return;
+    scroller.scrollTo({top:boxes[n-1].el.offsetTop-12,behavior:instant?"auto":"smooth"});
+    updateBar(n);
+  }else render(n);
+}
+scroller.addEventListener("scroll",()=>{
+  if(raf||!built)return;
+  raf=requestAnimationFrame(()=>{
+    raf=0;
+    const h=boxes[0].el.offsetHeight+12;
+    const i=Math.floor((scroller.scrollTop-12+scroller.clientHeight/3)/h);
+    updateBar(Math.min(Math.max(i,0),pdf.numPages-1)+1);
+  });
+},{passive:true});
+function relayout(){
+  layout();
+  vis.forEach(i=>{const o=boxes[i];if(o){o.r=false;renderBox(i)}});
+}
+
 pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 pdfjsLib.getDocument({url:URL_PDF,disableAutoFetch:true}).promise
-  .then(d=>{pdf=d;$("tot").textContent=d.numPages;$("num").max=d.numPages;render(1)})
+  .then(d=>{
+    pdf=d;$("tot").textContent=d.numPages;$("num").max=d.numPages;
+    if(isFs())buildScroller();else render(1);
+  })
   .catch(()=>{$("fb").hidden=false});
 setTimeout(()=>{if(!pdf)$("fb").hidden=false},30000);
 
@@ -150,34 +229,40 @@ function enterFs(){
   viewer.classList.add("fs");document.body.classList.add("lock");
   $("fs").textContent="Exit full screen";
   if(viewer.requestFullscreen){try{viewer.requestFullscreen().catch(()=>{})}catch(e){}}
-  setTimeout(()=>render(cur),120);
+  if(pdf)buildScroller();else coverBox();
 }
 function exitFs(){
   viewer.classList.remove("fs");document.body.classList.remove("lock");
   $("fs").textContent="Full screen";
   if(document.fullscreenElement){try{document.exitFullscreen()}catch(e){}}
-  setTimeout(()=>render(cur),120);
+  if(pdf)setTimeout(()=>render(cur),100);
 }
 $("fs").onclick=()=>isFs()?exitFs():enterFs();
 $("xit").onclick=exitFs;
-document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&isFs())exitFs()});
+document.addEventListener("fullscreenchange",()=>{
+  if(!document.fullscreenElement&&isFs())exitFs();
+  else if(isFs())setTimeout(relayout,150);
+});
 
-$("prev").onclick=()=>render(cur-1);
-$("next").onclick=()=>render(cur+1);
-$("num").onchange=e=>render(parseInt(e.target.value)||1);
+$("prev").onclick=()=>goTo(cur-1);
+$("next").onclick=()=>goTo(cur+1);
+$("num").onchange=e=>goTo(parseInt(e.target.value)||1);
 addEventListener("keydown",e=>{
   if(e.key==="Escape"&&isFs())return exitFs();
   if(e.target.tagName==="INPUT")return;
-  if(e.key==="ArrowRight")render(cur+1);
-  if(e.key==="ArrowLeft")render(cur-1);
+  if(e.key==="ArrowRight"&&!isFs())goTo(cur+1);
+  if(e.key==="ArrowLeft"&&!isFs())goTo(cur-1);
 });
 let sx=null;
 stage.addEventListener("touchstart",e=>{sx=e.touches[0].clientX},{passive:true});
 stage.addEventListener("touchend",e=>{
   if(sx===null)return;const dx=e.changedTouches[0].clientX-sx;sx=null;
-  if(Math.abs(dx)>60)render(cur+(dx<0?1:-1));
+  if(Math.abs(dx)>60)goTo(cur+(dx<0?1:-1));
 });
-addEventListener("resize",()=>{clearTimeout(tm);tm=setTimeout(()=>render(cur),200)});
+addEventListener("resize",()=>{
+  clearTimeout(tm);
+  tm=setTimeout(()=>isFs()?relayout():render(cur),200);
+});
 </script>
 </body>
 </html>
